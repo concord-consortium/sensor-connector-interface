@@ -271,7 +271,7 @@ module.exports = {
         isPolling = true;
         isConnected = false;
         timeoutTimer.start();
-        statusIntervalId = setInterval(requestStatus, 500);
+        statusIntervalId = setInterval(requestStatus, 100);
     },
 
     stopPolling: function() {
