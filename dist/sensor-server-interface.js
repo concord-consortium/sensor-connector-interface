@@ -1,4 +1,4 @@
-!function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.sensorLabquest2Interface=e():"undefined"!=typeof global?global.sensorLabquest2Interface=e():"undefined"!=typeof self&&(self.sensorLabquest2Interface=e())}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+!function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.sensorServerInterface=e():"undefined"!=typeof global?global.sensorServerInterface=e():"undefined"!=typeof self&&(self.sensorServerInterface=e())}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /*global XDomainRequest */
 
 'use strict';
@@ -63,7 +63,6 @@ function createCORSRequest(method, relativeUrl) {
 var lastStatusTimeStamp = 0;
 var isConnected = false;
 var isCollecting = false;
-var canControl = true;
 
 // called by timeoutTimer
 function connectionTimedOut() {
@@ -148,14 +147,6 @@ function statusLoaded() {
     } else if (! isCollecting && response.collection.isCollecting) {
         isCollecting = true;
         events.emit('collectionStarted');
-    }
-
-    if (canControl && ! response.collection.canControl) {
-        canControl = false;
-        events.emit('controlDisabled');
-    } else if (! canControl && response.collection.canControl) {
-        canControl = true;
-        events.emit('controlEnabled');
     }
 }
 
@@ -312,10 +303,6 @@ module.exports = {
 
     get isCollecting() {
         return isPolling && isConnected && isCollecting;
-    },
-
-    get canControl() {
-        return canControl;
     }
 };
 
