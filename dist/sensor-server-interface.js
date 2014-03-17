@@ -21,6 +21,7 @@ var events = new EventEmitter2({
 
 var urlPrefix = '';
 var TIME_LIMIT_IN_MS = 10000;
+var POLLING_DELAY = 100;
 
 var isPolling = false;
 
@@ -271,7 +272,7 @@ module.exports = {
         isPolling = true;
         isConnected = false;
         timeoutTimer.start();
-        statusIntervalId = setInterval(requestStatus, 100);
+        statusIntervalId = setInterval(requestStatus, POLLING_DELAY);
     },
 
     stopPolling: function() {
