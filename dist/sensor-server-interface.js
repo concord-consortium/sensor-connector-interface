@@ -195,7 +195,7 @@ function processColumns(cols) {
 
         dataset.columns[columnFromResponse.position] = column;
 
-        if (column.units && column.units !== columnFromResponse.units) {
+        if (column.units !== null && column.units !== columnFromResponse.units) {
             eventsToEmit.push('columnTypeChanged');
         }
 
