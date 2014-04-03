@@ -189,6 +189,7 @@ function processColumns(cols) {
                 units: null,
                 receivedValuesTimeStamp: 0,
                 requestedValuesTimeStamp: 0,
+                liveValueTimeStamp: 0,
                 liveValue: null,
                 data: []
             };
@@ -205,6 +206,7 @@ function processColumns(cols) {
         column.units = columnFromResponse.units;
         column.id = colId;
         column.liveValue = parseFloat(columnFromResponse.liveValue || 0);
+        column.liveValueTimeStamp = columnFromResponse.liveValueTimeStamp;
 
         if (column.requestedValuesTimeStamp < columnFromResponse.valuesTimeStamp) {
             requestData(colId, columnFromResponse.valuesTimeStamp);
