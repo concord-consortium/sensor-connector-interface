@@ -20,7 +20,7 @@ var events = new EventEmitter2({
 });
 
 var urlPrefix = '';
-var TIME_LIMIT_IN_MS = 10000;
+var TIME_LIMIT_IN_MS = 5000;
 var POLLING_DELAY = 100;
 
 var isPolling = false;
