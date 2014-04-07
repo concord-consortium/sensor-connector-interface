@@ -132,7 +132,6 @@ function statusLoaded() {
     }
 
     lastStatusTimeStamp = response.requestTimeStamp;
-    hasAttachedInterface = (response.currentInterface == "None Found");
 
     timeoutTimer.reset();
     processDatasets(response.sets);
@@ -150,6 +149,14 @@ function statusLoaded() {
     } else if (! isCollecting && response.collection.isCollecting) {
         isCollecting = true;
         events.emit('collectionStarted');
+    }
+
+    if (hasAttachedInterface && response.currentInterface === "None Found") {
+        hasAttachedInterface = false;
+        events.emit('interfaceRemoved');
+    } else if (! hasAttachedInterface && response.currentInterface !== "None Found") {
+        hasAttachedInterface = true;
+        events.emit('interfaceConnected');
     }
 }
 
