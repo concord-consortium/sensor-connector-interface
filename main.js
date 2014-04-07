@@ -63,6 +63,7 @@ function createCORSRequest(method, relativeUrl) {
 var lastStatusTimeStamp = 0;
 var isConnected = false;
 var isCollecting = false;
+var hasAttachedInterface = false;
 
 // called by timeoutTimer
 function connectionTimedOut() {
@@ -131,6 +132,7 @@ function statusLoaded() {
     }
 
     lastStatusTimeStamp = response.requestTimeStamp;
+    hasAttachedInterface = (response.currentInterface == "None Found");
 
     timeoutTimer.reset();
     processDatasets(response.sets);
@@ -297,6 +299,10 @@ module.exports = {
 
     off: function() {
         events.off.apply(events, arguments);
+    },
+
+    get hasAttachedInterface() {
+        return hasAttachedInterface;
     },
 
     get datasets() {
