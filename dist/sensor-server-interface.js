@@ -152,10 +152,11 @@ function statusLoaded() {
         events.emit('collectionStarted');
     }
 
-    if (hasAttachedInterface && response.currentInterface === "None Found") {
+    var currentlyAttached = typeof(response.currentInterface) === "undefined" || response.currentInterface === null || response.currentInterface !== "None Found";
+    if (hasAttachedInterface && !currentlyAttached) {
         hasAttachedInterface = false;
         events.emit('interfaceRemoved');
-    } else if (! hasAttachedInterface && response.currentInterface !== "None Found") {
+    } else if (!hasAttachedInterface && currentlyAttached) {
         hasAttachedInterface = true;
         events.emit('interfaceConnected');
     }
