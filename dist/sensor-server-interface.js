@@ -196,6 +196,7 @@ function processColumns(cols) {
             // HOWEVER, assume a column is never removed from one dataset and added to another
             column = columnsById[colId] = {
                 id: null,
+                name: null,
                 units: null,
                 receivedValuesTimeStamp: 0,
                 requestedValuesTimeStamp: 0,
@@ -214,6 +215,7 @@ function processColumns(cols) {
         }
 
         column.units = columnFromResponse.units;
+        column.name = columnFromResponse.name;
         column.id = colId;
         column.liveValue = parseFloat(columnFromResponse.liveValue || 0);
         column.liveValueTimeStamp = columnFromResponse.liveValueTimeStamp;
