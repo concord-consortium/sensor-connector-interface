@@ -64,6 +64,7 @@ function createCORSRequest(method, relativeUrl) {
 var lastStatusTimeStamp = 0;
 var isConnected = false;
 var isCollecting = false;
+var canControl = true;
 var hasAttachedInterface = false;
 
 // called by timeoutTimer
@@ -150,6 +151,14 @@ function statusLoaded() {
     } else if (! isCollecting && response.collection.isCollecting) {
         isCollecting = true;
         events.emit('collectionStarted');
+    }
+
+    if (canControl && ! response.collection.canControl) {
+        canControl = false;
+        events.emit('controlDisabled');
+    } else if (! canControl && response.collection.canControl) {
+        canControl = true;
+        events.emit('controlEnabled');
     }
 
     var currentlyAttached = typeof(response.currentInterface) === "undefined" || response.currentInterface === null || response.currentInterface !== "None Found";
@@ -329,5 +338,9 @@ module.exports = {
 
     get isCollecting() {
         return isPolling && isConnected && isCollecting;
+    },
+
+    get canControl() {
+        return canControl;
     }
 };
