@@ -19,6 +19,7 @@ var events = new EventEmitter2({
 });
 
 var urlPrefix = '';
+var urlQueryParams = '';
 var TIME_LIMIT_IN_MS = 5000;
 var POLLING_DELAY = 100;
 
@@ -39,7 +40,7 @@ function initializeSession() {
 
 // see http://www.html5rocks.com/en/tutorials/cors/
 function createCORSRequest(method, relativeUrl) {
-    var url = urlPrefix + relativeUrl;
+    var url = urlPrefix + relativeUrl + urlQueryParams;
     var xhr = new XMLHttpRequest();
 
     if ('withCredentials' in xhr) {
@@ -282,8 +283,11 @@ function promisifyRequest(url) {
 
 module.exports = {
 
-    startPolling: function(address) {
+    startPolling: function(address, clientId) {
         urlPrefix = 'http://' + address;
+        if (clientId) {
+            urlQueryParams = '?client='+clientId;
+        }
 
         requestStatus();
         isPolling = true;
