@@ -19,6 +19,7 @@ var events = new EventEmitter2({
 });
 
 var urlPrefix = '';
+var rawQueryParams = {};
 var urlQueryParams = '';
 var TIME_LIMIT_IN_MS = 5000;
 var POLLING_DELAY = 100;
@@ -61,10 +62,24 @@ function createCORSRequest(method, relativeUrl) {
     return xhr;
 }
 
+function _generateQueryParams() {
+    var v;
+    Object.keys(rawQueryParams).forEach(function(k,i) {
+        v = rawQueryParams[k];
+        if (i == 0) {
+            urlQueryParams = '?'+k+'='+v;
+        } else {
+            urlQueryParams += '&'+k+'='+v;
+        }
+
+    });
+}
+
 var lastStatusTimeStamp = 0;
 var isConnected = false;
 var isCollecting = false;
 var canControl = true;
+var inControl = null;
 var hasAttachedInterface = false;
 
 // called by timeoutTimer
@@ -152,6 +167,8 @@ function statusLoaded() {
         isCollecting = true;
         events.emit('collectionStarted');
     }
+
+    inControl = response.collection.inControl;
 
     if (canControl && ! response.collection.canControl) {
         canControl = false;
@@ -292,11 +309,11 @@ function promisifyRequest(url) {
 
 module.exports = {
 
-    startPolling: function(address, clientId) {
+    startPolling: function(address, clientId, clientName) {
         urlPrefix = 'http://' + address;
-        if (clientId) {
-            urlQueryParams = '?client='+clientId;
-        }
+        rawQueryParams.client = clientId;
+        rawQueryParams.clientName = clientName;
+        _generateQueryParams();
 
         requestStatus();
         isPolling = true;
@@ -324,6 +341,24 @@ module.exports = {
         events.off.apply(events, arguments);
     },
 
+    get clientId() {
+        return rawQueryParams.client;
+    },
+
+    set clientId(id) {
+        rawQueryParams.client = id;
+        _generateQueryParams();
+    },
+
+    get clientName() {
+        return rawQueryParams.clientName;
+    },
+
+    set clientName(name) {
+        rawQueryParams.clientName = name;
+        _generateQueryParams();
+    },
+
     get hasAttachedInterface() {
         return hasAttachedInterface;
     },
@@ -338,6 +373,10 @@ module.exports = {
 
     get isCollecting() {
         return isPolling && isConnected && isCollecting;
+    },
+
+    get inControl() {
+        return inControl;
     },
 
     get canControl() {
