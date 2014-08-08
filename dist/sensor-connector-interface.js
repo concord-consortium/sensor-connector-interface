@@ -63,6 +63,15 @@ function createCORSRequest(method, relativeUrl) {
     return xhr;
 }
 
+
+function _setRawQueryParams(k, v) {
+    if (v == null) {
+        delete rawQueryParams[k];
+    } else {
+        rawQueryParams[k] = v;
+    }
+}
+
 function _generateQueryParams() {
     var v;
     Object.keys(rawQueryParams).forEach(function(k,i) {
@@ -312,8 +321,8 @@ module.exports = {
 
     startPolling: function(address, clientId, clientName) {
         urlPrefix = 'http://' + address;
-        rawQueryParams.client = clientId;
-        rawQueryParams.clientName = clientName;
+        _setRawQueryParams('client', clientId);
+        _setRawQueryParams('clientName', clientName);
         _generateQueryParams();
 
         requestStatus();
@@ -347,7 +356,7 @@ module.exports = {
     },
 
     set clientId(id) {
-        rawQueryParams.client = id;
+        _setRawQueryParams('client', id);
         _generateQueryParams();
     },
 
@@ -356,7 +365,7 @@ module.exports = {
     },
 
     set clientName(name) {
-        rawQueryParams.clientName = name;
+        _setRawQueryParams('clientName', name);
         _generateQueryParams();
     },
 
