@@ -319,7 +319,7 @@ function promisifyRequest(url) {
 module.exports = {
 
     startPolling: function(address, clientId, clientName) {
-        urlPrefix = 'http://' + address;
+        urlPrefix = address;
         _setRawQueryParams('client', clientId);
         _setRawQueryParams('clientName', clientName);
         _generateQueryParams();
