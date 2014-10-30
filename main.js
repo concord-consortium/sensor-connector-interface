@@ -22,6 +22,7 @@ var urlPrefix = '';
 var rawQueryParams = {};
 var urlQueryParams = '';
 var TIME_LIMIT_IN_MS = 5000;
+var LAUNCH_TIME_LIMIT_IN_MS = 30000;
 var POLLING_DELAY = 100;
 
 var isPolling = false;
@@ -90,16 +91,22 @@ var isCollecting = false;
 var canControl = true;
 var inControl = null;
 var hasAttachedInterface = false;
+var plugin = null;
+var launchFrame = null;
+var waitingOnLaunch = false;
+var launchTimedOut = false;
 
 // called by timeoutTimer
 function connectionTimedOut() {
-    events.emit('connectionTimedOut');
-    isConnected = false;
+    if (!waitingOnLaunch) {
+        events.emit('connectionTimedOut');
+        isConnected = false;
+    }
 }
 
 var timeoutTimer = {
     start: function() {
-        this.timerId = setTimeout(connectionTimedOut, TIME_LIMIT_IN_MS);
+        this.timerId = setTimeout(tryLaunchingTimeout, TIME_LIMIT_IN_MS);
     },
 
     reset: function() {
@@ -108,6 +115,24 @@ var timeoutTimer = {
     },
 
     stop: function() {
+        clearTimeout(this.timerId);
+    }
+};
+
+var launchTimer = {
+    start: function() {
+        waitingOnLaunch = true;
+        var _self = this;
+        this.timerId = setTimeout(function() { launchTimedOut = true; events.emit('launchTimedOut'); _self.stop(); }, LAUNCH_TIME_LIMIT_IN_MS);
+    },
+
+    reset: function() {
+        this.stop();
+        this.start();
+    },
+
+    stop: function() {
+        waitingOnLaunch = false;
         clearTimeout(this.timerId);
     }
 };
@@ -123,13 +148,74 @@ function requestStatus() {
         return;
     }
 
-    xhr.onerror = statusErrored;
-    xhr.onload = statusLoaded;
+    if (plugin !== null) {
+        xhr.onerror = statusErrored;
+        xhr.onload = statusLoaded;
+    } else {
+        xhr.onerror = tryLaunchingErrored;
+        xhr.onload = statusLoaded;
+    }
     xhr.send();
 }
 
 function statusErrored() {
-    events.emit('statusErrored');
+    if (!waitingOnLaunch) {
+        events.emit('statusErrored');
+    }
+}
+
+function injectPlugin() {
+    if (plugin === null) {
+        var obj = document.createElement('div');
+        obj.id = 'sensor-connector-plugin-parent';
+        obj.innerHTML = '<object id="sensor-connector-plugin" type="application/vnd-concordconsortium-sensorconnector" width="1" height="1"><param name="onload" value="launchSensorConnector" /></object>';
+        document.body.appendChild(obj);
+        plugin = document.getElementById('sensor-connector-plugin');
+    }
+}
+
+function injectCcscFrame() {
+    if (launchFrame !== null) {
+        document.body.removeChild(launchFrame);
+    }
+    var obj = document.createElement('div');
+    obj.id = 'sensor-connector-launch-frame-parent';
+    obj.innerHTML = '<iframe id="sensor-connector-launch-frame" src="ccsc://foo.bar/"></iframe>';
+    document.body.appendChild(obj);
+    launchFrame = document.getElementById('sensor-connector-launch-frame-parent');
+}
+
+function launchSensorConnector() {
+    if (!waitingOnLaunch) {
+        injectCcscFrame();
+        launchTimer.start();
+    }
+}
+
+function tryLaunching() {
+    injectPlugin();
+    if (plugin.valid) {
+        launchSensorConnector();
+        return true;
+    } else {
+        return false;
+    }
+}
+
+function tryLaunchingErrored() {
+    if (tryLaunching()) {
+        requestStatus();
+    } else {
+        statusErrored();
+    }
+}
+
+function tryLaunchingTimeout() {
+    if (tryLaunching()) {
+        requestStatus();
+    } else {
+        connectionTimedOut();
+    }
 }
 
 function statusLoaded() {
@@ -160,6 +246,7 @@ function statusLoaded() {
     lastStatusTimeStamp = response.requestTimeStamp;
 
     timeoutTimer.reset();
+    launchTimer.stop();
     processDatasets(response.sets);
     processColumns(response.columns);
 
@@ -327,6 +414,7 @@ module.exports = {
         requestStatus();
         isPolling = true;
         isConnected = false;
+        launchTimedOut = false;
         timeoutTimer.start();
         statusIntervalId = setInterval(requestStatus, POLLING_DELAY);
     },
@@ -336,6 +424,9 @@ module.exports = {
         clearInterval(statusIntervalId);
         currentSessionID = undefined;
         isPolling = false;
+        if (launchFrame !== null) {
+            document.body.removeChild(launchFrame);
+        }
     },
 
     requestStart: promisifyRequest('/control/start'),
@@ -386,6 +477,10 @@ module.exports = {
 
     get inControl() {
         return inControl;
+    },
+
+    get launchTimedOut() {
+        return launchTimedOut;
     },
 
     get canControl() {
