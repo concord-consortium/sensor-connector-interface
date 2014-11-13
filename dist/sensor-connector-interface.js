@@ -427,6 +427,7 @@ module.exports = {
         isPolling = false;
         if (launchFrame !== null) {
             document.body.removeChild(launchFrame);
+            launchFrame = null;
         }
     },
 
