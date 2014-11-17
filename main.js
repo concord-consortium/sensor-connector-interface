@@ -164,6 +164,26 @@ function statusErrored() {
     }
 }
 
+function statusPluginInaccessible() {
+    if (!waitingOnLaunch) {
+        events.emit('pluginInaccessible');
+    }
+}
+
+function isPluginInstalled() {
+    if ('application/vnd-concordconsortium-sensorconnector' in navigator.mimeTypes) {
+        return true;
+    } else if ('SensorConnectorDetection' in navigator.plugins) {
+        return true;
+    } else {
+        try {
+            var control = new ActiveXObject('ConcordConsortium.SensorConnectorDetection');
+            if (control) { return true; }
+        } catch (e) {}
+    }
+    return false;
+}
+
 function injectPlugin() {
     if (plugin === null) {
         var obj = document.createElement('div');
@@ -192,27 +212,39 @@ function launchSensorConnector() {
     }
 }
 
+var LAUNCH_RESULT_NO_PLUGIN = 0,
+    LAUNCH_RESULT_PLUGIN_NOT_VALID = 1,
+    LAUNCH_RESULT_OK = 2;
 function tryLaunching() {
-    injectPlugin();
-    if (plugin.valid) {
-        launchSensorConnector();
-        return true;
-    } else {
-        return false;
+    if (isPluginInstalled()) {
+        injectPlugin();
+        if (plugin.valid) {
+            launchSensorConnector();
+            return LAUNCH_RESULT_OK;
+        } else {
+            return LAUNCH_RESULT_PLUGIN_NOT_VALID;
+        }
     }
+    return LAUNCH_RESULT_NO_PLUGIN;
 }
 
 function tryLaunchingErrored() {
-    if (tryLaunching()) {
+    var result = tryLaunching();
+    if (result == LAUNCH_RESULT_OK) {
         requestStatus();
+    } else if (result == LAUNCH_RESULT_PLUGIN_NOT_VALID) {
+        statusPluginInaccessible();
     } else {
         statusErrored();
     }
 }
 
 function tryLaunchingTimeout() {
-    if (tryLaunching()) {
+    var result = tryLaunching();
+    if (result == LAUNCH_RESULT_OK) {
         requestStatus();
+    } else if (result == LAUNCH_RESULT_PLUGIN_NOT_VALID) {
+        statusPluginInaccessible();
     } else {
         connectionTimedOut();
     }
