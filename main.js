@@ -121,9 +121,8 @@ var timeoutTimer = {
 
 var launchTimer = {
     start: function() {
-        waitingOnLaunch = true;
         var _self = this;
-        this.timerId = setTimeout(function() { launchTimedOut = true; events.emit('launchTimedOut'); _self.stop(); }, LAUNCH_TIME_LIMIT_IN_MS);
+        this.timerId = setTimeout(function() { launchTimedOut = true; events.emit('launchTimedOut'); }, LAUNCH_TIME_LIMIT_IN_MS);
     },
 
     reset: function() {
@@ -209,6 +208,7 @@ function launchSensorConnector() {
     if (!waitingOnLaunch) {
         injectCcscFrame();
         launchTimer.start();
+        waitingOnLaunch = true;
     }
 }
 
