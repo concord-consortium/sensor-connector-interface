@@ -1,4 +1,4 @@
-/*global XDomainRequest */
+/*globals XDomainRequest, ActiveXObject */
 
 'use strict';
 
@@ -76,7 +76,7 @@ function _generateQueryParams() {
     var v;
     Object.keys(rawQueryParams).forEach(function(k,i) {
         v = rawQueryParams[k];
-        if (i == 0) {
+        if (i === 0) {
             urlQueryParams = '?'+k+'='+v;
         } else {
             urlQueryParams += '&'+k+'='+v;
@@ -121,7 +121,6 @@ var timeoutTimer = {
 
 var launchTimer = {
     start: function() {
-        var _self = this;
         this.timerId = setTimeout(function() { launchTimedOut = true; events.emit('launchTimedOut'); }, LAUNCH_TIME_LIMIT_IN_MS);
     },
 
@@ -230,9 +229,9 @@ function tryLaunching() {
 
 function tryLaunchingErrored() {
     var result = tryLaunching();
-    if (result == LAUNCH_RESULT_OK) {
+    if (result === LAUNCH_RESULT_OK) {
         requestStatus();
-    } else if (result == LAUNCH_RESULT_PLUGIN_NOT_VALID) {
+    } else if (result === LAUNCH_RESULT_PLUGIN_NOT_VALID) {
         statusPluginInaccessible();
     } else {
         statusErrored();
@@ -241,9 +240,9 @@ function tryLaunchingErrored() {
 
 function tryLaunchingTimeout() {
     var result = tryLaunching();
-    if (result == LAUNCH_RESULT_OK) {
+    if (result === LAUNCH_RESULT_OK) {
         requestStatus();
-    } else if (result == LAUNCH_RESULT_PLUGIN_NOT_VALID) {
+    } else if (result === LAUNCH_RESULT_PLUGIN_NOT_VALID) {
         statusPluginInaccessible();
     } else {
         connectionTimedOut();
@@ -330,7 +329,7 @@ function processDatasets(sets) {
             datasets.unshift(datasetsById[setId]);
         }
         // Set the columns array length so that it's the correct size if a column was removed
-        datasetsById[setId].columns.length = sets[setId].colIDs.length
+        datasetsById[setId].columns.length = sets[setId].colIDs.length;
     });
     // make sure the highest-numbered dataset is always datasets[0]
     datasets.sort(function(d1, d2) { return d2.setId-d1.setId; });
