@@ -198,7 +198,7 @@ function injectCcscFrame() {
     }
     var obj = document.createElement('div');
     obj.id = 'sensor-connector-launch-frame-parent';
-    obj.innerHTML = '<iframe id="sensor-connector-launch-frame" src="ccsc://foo.bar/"></iframe>';
+    obj.innerHTML = '<iframe id="sensor-connector-launch-frame" src="ccsc://sensorconnector.concord.org/"></iframe>';
     document.body.appendChild(obj);
     launchFrame = document.getElementById('sensor-connector-launch-frame-parent');
 }
