@@ -5,6 +5,8 @@
   "main": "main.js",
   "dependencies": {
     "rsvp": "3.x",
+    "lodash": "3.x",
+    "machina": "~1.1.2",
     "eventemitter2": ">= 0.4"
   },
   "devDependencies": {
