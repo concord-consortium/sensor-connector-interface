@@ -1,5 +1,5 @@
 !function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.sensorConnectorInterface=e():"undefined"!=typeof global?global.sensorConnectorInterface=e():"undefined"!=typeof self&&(self.sensorConnectorInterface=e())}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-/*globals XDomainRequest, ActiveXObject */
+/*globals XDomainRequest */
 
 'use strict';
 
@@ -92,18 +92,9 @@ var isCollecting = false;
 var canControl = true;
 var inControl = null;
 var hasAttachedInterface = false;
-var plugin = null;
 var launchFrame = null;
 var waitingOnLaunch = false;
 var launchTimedOut = false;
-
-// called by timeoutTimer
-function connectionTimedOut() {
-    if (!waitingOnLaunch) {
-        events.emit('connectionTimedOut');
-        isConnected = false;
-    }
-}
 
 var timeoutTimer = {
     start: function() {
@@ -147,49 +138,14 @@ function requestStatus() {
         return;
     }
 
-    if (plugin !== null) {
-        xhr.onerror = statusErrored;
-        xhr.onload = statusLoaded;
-    } else {
-        xhr.onerror = tryLaunchingErrored;
-        xhr.onload = statusLoaded;
-    }
+    xhr.onerror = statusErrored;
+    xhr.onload = statusLoaded;
     xhr.send();
 }
 
 function statusErrored() {
     if (!waitingOnLaunch) {
         events.emit('statusErrored');
-    }
-}
-
-function statusPluginInaccessible() {
-    if (!waitingOnLaunch) {
-        events.emit('pluginInaccessible');
-    }
-}
-
-function isPluginInstalled() {
-    if ('application/vnd-concordconsortium-sensorconnector' in navigator.mimeTypes) {
-        return true;
-    } else if ('SensorConnectorDetection' in navigator.plugins) {
-        return true;
-    } else {
-        try {
-            var control = new ActiveXObject('ConcordConsortium.SensorConnectorDetection');
-            if (control) { return true; }
-        } catch (e) {}
-    }
-    return false;
-}
-
-function injectPlugin() {
-    if (plugin === null) {
-        var obj = document.createElement('div');
-        obj.id = 'sensor-connector-plugin-parent';
-        obj.innerHTML = '<object id="sensor-connector-plugin" type="application/vnd-concordconsortium-sensorconnector" width="1" height="1"><param name="onload" value="launchSensorConnector" /></object>';
-        document.body.appendChild(obj);
-        plugin = document.getElementById('sensor-connector-plugin');
     }
 }
 
@@ -212,46 +168,18 @@ function launchSensorConnector() {
     }
 }
 
-var LAUNCH_RESULT_NO_PLUGIN = 0,
-    LAUNCH_RESULT_PLUGIN_NOT_VALID = 1,
-    LAUNCH_RESULT_OK = 2;
 function tryLaunching() {
-    if (isPluginInstalled()) {
-        injectPlugin();
-        if (plugin.valid) {
-            launchSensorConnector();
-            return LAUNCH_RESULT_OK;
-        } else {
-            return LAUNCH_RESULT_PLUGIN_NOT_VALID;
-        }
-    }
-    return LAUNCH_RESULT_NO_PLUGIN;
-}
-
-function tryLaunchingErrored() {
-    var result = tryLaunching();
-    if (result === LAUNCH_RESULT_OK) {
-        requestStatus();
-    } else if (result === LAUNCH_RESULT_PLUGIN_NOT_VALID) {
-        statusPluginInaccessible();
-    } else {
-        statusErrored();
-    }
+    launchSensorConnector();
 }
 
 function tryLaunchingTimeout() {
-    var result = tryLaunching();
-    if (result === LAUNCH_RESULT_OK) {
-        requestStatus();
-    } else if (result === LAUNCH_RESULT_PLUGIN_NOT_VALID) {
-        statusPluginInaccessible();
-    } else {
-        connectionTimedOut();
-    }
+    tryLaunching();
+    requestStatus();
 }
 
 function statusLoaded() {
-    var response = this.response || JSON.parse(this.responseText);
+    var response = this.response || JSON.parse(this.responseText); // jshint ignore:line
+
     if (typeof(response) === "string") { response = JSON.parse(response); }
 
     if ( ! isPolling ) {
