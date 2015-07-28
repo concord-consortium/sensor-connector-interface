@@ -31,6 +31,7 @@ var SensorConnectorState = Machina.Fsm.extend({
   _COLLECTING_DELAY: 100,
 
   _timer: null,
+  _hostCycler: null,
   _rawQueryParams: {},
   _statusIntervalId: 0,
   _lastStatusTimeStamp: 0,
@@ -57,6 +58,23 @@ var SensorConnectorState = Machina.Fsm.extend({
         clearTimeout(this._timerId);
       }
     };
+
+    this._hostCycler = {
+      get moreHosts() {
+        return fsm._currentHostIdx + 1 < fsm._availableHosts.length;
+      },
+
+      nextHost: function() {
+        fsm._currentHostIdx++;
+        fsm.urlPrefix = fsm._availableHosts[fsm._currentHostIdx];
+      },
+
+      reset: function() {
+        fsm._currentHostIdx = 0;
+        fsm.urlPrefix = fsm._availableHosts[fsm._currentHostIdx];
+      }
+    };
+
     this._initializeSession();
   },
 
@@ -73,7 +91,7 @@ var SensorConnectorState = Machina.Fsm.extend({
     },
     connecting: {
       _onEnter: function() {
-        this.urlPrefix = this._availableHosts[this._currentHostIdx];
+        this._hostCycler.reset();
         this._requestStatus();
         this._timer.start(this._TIME_LIMIT_IN_MS);
       },
@@ -82,8 +100,14 @@ var SensorConnectorState = Machina.Fsm.extend({
         this.transition('polling');
       },
       statusErrored: function() {
-        this._timer.stop();
-        this.transition('launching');
+        if (this._hostCycler.moreHosts) {
+          this._hostCycler.nextHost();
+          this._requestStatus();
+        } else {
+          this._hostCycler.reset();
+          this._timer.stop();
+          this.transition('launching');
+        }
       },
       timeout: function() {
         this.transition('launching');
@@ -100,10 +124,16 @@ var SensorConnectorState = Machina.Fsm.extend({
         this.transition('polling');
       },
       statusErrored: function() {
-        // keep polling until the launch timeout time limit passes
-        setTimeout(function(){
+        // keep polling until the launch timeout time limit passes, but poll all of the available hosts
+        if (this._hostCycler.moreHosts) {
+          this._hostCycler.nextHost();
           this._requestStatus();
-        }.bind(this), this._POLLING_DELAY);
+        } else {
+          this._hostCycler.reset();
+          setTimeout(function(){
+            this._requestStatus();
+          }.bind(this), this._POLLING_DELAY);
+        }
       },
       timeout: function() {
         this.transition('launchTimedOut');
@@ -283,12 +313,7 @@ var SensorConnectorState = Machina.Fsm.extend({
     },
     launchTimedOut: {
       _onEnter: function() {
-        if (this._currentHostIdx + 1 < this._availableHosts.length) {
-          this._currentHostIdx++;
-          this.transition('connecting');
-        } else {
-          events.emit('launchTimedOut');
-        }
+        events.emit('launchTimedOut');
       }
     },
     unsupported: {
@@ -300,7 +325,7 @@ var SensorConnectorState = Machina.Fsm.extend({
 
   setHosts: function(hosts) {
     this._availableHosts = _.isArray(hosts) ? hosts : [hosts];
-    this._currentHostIdx = 0;
+    this._hostCycler.reset();
   },
 
   getParam: function(param) {
@@ -611,8 +636,6 @@ function SensorConnectorInterface() {
     },
 
     get canControl() {
-      window.fsm = this.stateMachine;
-      console.log("state machine: ", this.stateMachine, "state: ", this.stateMachine.state);
       return this.stateMachine.state !== 'controlDisabled';
     }
   };
