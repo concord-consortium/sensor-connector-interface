@@ -1,13 +1,42 @@
 <html>
 <meta charset="utf-8">
 <head>
-<title>Sensor Server test page</title>
+<title>Sensor Connector Interface Demo</title>
+    
+<style>
+    table {
+        border-spacing: 0;
+        border-collapse: collapse;
+    }
+    th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+        padding: 4px;
+    }
+    
+    .flexBox {
+        display: flex;
+    }
+    .flexBox h2 {
+        margin-bottom: 8px;
+    }
+    .flexBox div {
+        margin-right: 40px;
+    }
+    
+    .scrollBox {
+        height: 400px;
+        overflow-y: scroll;
+        display: inline-block;
+    }    
+</style>
+    
 <script src="dist/sensor-connector-interface.js"></script>
 <script src="js/jquery-1.10.2.js"></script>
 <script>
     $(document).ready(function() {
-        var sensor = sensorLabquest2Interface;
-
+        sensor = new sensorConnectorInterface();
+        
         $('#connect').on('click', function() {
             $('#control-status').html('Remote control is enabled. To collect data, press start/stop on this page.');
             var ip = $('input[name=ip]').val();
@@ -45,23 +74,72 @@
         });
 
         var lastColumnLengthById = {};
-
-        function dataHandler() {
+        var columnNames = [];
+        function dataHandler(setId) {
             sensor.datasets.forEach(function(dataset) {
-                dataset.columns.forEach(function(column, index) {
+                
+                dataset.columns.forEach(function(column, columnIndex) {
                     var lastLength = lastColumnLengthById[column.id];
                     if (lastLength === undefined) {
                         lastLength = lastColumnLengthById[column.id] = 0;
-                    }
-
+                        
+                        // check if the column is new
+                        if(columnNames.indexOf(column.name) === -1) {
+                            // add the column name to the table
+                            var colHeader = column.name == null ? "" : column.name;
+                            colHeader += " ("+column.units+")";
+                            setHeader(columnIndex, colHeader);
+                            columnNames.push(column.name);
+                        }
+                    }                    
+                    
+                    // check there's new data for this column
                     if (column.data.length > lastLength) {
+                        var newData = column.data.slice(lastLength);
+                        
+                        // add new data to the table
+                        newData.forEach(function(data, rowIndex) {
+                            setCell(lastLength + rowIndex, columnIndex, data);
+                        });
+                        
+                        // log event
                         $('#events').prepend(
-                            "<p>New data for " + column.units + " " + "(position " + (index+1) + "): " + column.data.slice(lastLength).join(',') + "</p>"
+                            "<p>New data for " + column.units + " " + "(position " + (columnIndex+1) + "): " + newData.join(',') + "</p>"
                         );
+                        
                         lastColumnLengthById[column.id] = column.data.length;
                     }
                 });
             });
+        }
+        
+        var table = $('#sensor-data');
+        
+        function setHeader(columnIndex, contents) {
+            setCell(-1, columnIndex, contents, 'th');
+        }
+        
+        // rowIndex/columnIndex are zero-based (-1 for header row)
+        function setCell(rowIndex, columnIndex, contents, cellType) {
+            cellType = cellType || 'td';
+            
+            // find/create row
+            var row = table.find('tr')[rowIndex+1];
+            if(!row) {
+                row = $('<tr/>');
+                table.append(row);
+            }
+            
+            // add new cells if necessary
+            var cellCount = $(row).find(cellType).length;
+            var newCells = columnIndex - cellCount + 1;
+            for(var i=0; i < newCells; i++) {
+                $(row).append($('<'+cellType+'/>'));
+            }
+            
+            // set contents
+            var cell = $(row).find(cellType)[columnIndex];
+            $(cell).text(contents);
         }
     });
 </script>
@@ -70,7 +148,7 @@
 <body>
 <h1>LabQuest2 Demo</h1>
 
-<input name="ip" type="text"></input>
+<input name="ip" type="text" value="http://127.0.0.1:11180"></input>
 <button id="connect">Connect</button>
 <button id="disconnect">Disconnect</button>
 
@@ -78,8 +156,19 @@
 <button id="stop">Stop</button>
 <span id="control-status">Enter an address for your LabQuest2 and click Connect.</span>
 
-<div id="events"></div>
-
+<div class="flexBox">
+    <div>
+        <h2>Sensor Data:</h2>
+        <table id="sensor-data" class="scrollBox">
+            <tr></tr>
+        </table>
+    </div>
+    <div>
+        <h2>Event Log:</h2>
+        <div id="events" class="scrollBox">
+        </div>
+    </div>
+</div>
 </body>
 
 </html>
