@@ -1,5 +1,5 @@
 {
-  "name": "sensor-connector-interface",
+  "name": "@concord-consortium/sensor-connector-interface",
   "version": "0.1.0",
   "description": "Javascript interface to the Sensor Connector",
   "main": "main.js",

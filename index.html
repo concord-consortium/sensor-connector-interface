@@ -1,7 +1,7 @@
 <html>
 <meta charset="utf-8">
 <head>
-<title>Sensor Connector Interface Demo</title>
+<title>Sensor Connector Demo</title>
     
 <style>
     table {
@@ -35,12 +35,13 @@
 <script src="js/jquery-1.10.2.js"></script>
 <script>
     $(document).ready(function() {
+        var sensorIP = "http://127.0.0.1:11180";
         sensor = new sensorConnectorInterface();
         
         $('#connect').on('click', function() {
             $('#control-status').html('Remote control is enabled. To collect data, press start/stop on this page.');
             var ip = $('input[name=ip]').val();
-            sensor.startPolling(ip);
+            sensor.startPolling(sensorIP);
             sensor.on('*', function() {
                 var args = Array.prototype.slice.call(arguments, 0);
                 $('#events').prepend('<p>' + this.event + '(' + args.join(',') + ')</p>');
@@ -50,7 +51,7 @@
 
         $('#disconnect').on('click', function() {
             sensor.stopPolling();
-            $('#control-status').html('Enter an address for your LabQuest2 and click Connect.');
+            $('#control-status').html('Click Connect.');
         });
 
         $('#start').on('click', function() {
@@ -64,7 +65,7 @@
         sensor.on('controlDisabled', function() {
            $('#start').prop("disabled",true);
            $('#stop').prop("disabled",true);
-           $('#control-status').html("Remote control is disabled. To collect data, press start/stop on your LabQuest2.");
+           $('#control-status').html("Remote control is disabled. To collect data, press start/stop on your sensor.");
         });
 
         sensor.on('controlEnabled', function() {
@@ -146,15 +147,14 @@
 </head>
 
 <body>
-<h1>LabQuest2 Demo</h1>
+<h1>Sensor Connector Demo</h1>
 
-<input name="ip" type="text" value="http://127.0.0.1:11180"></input>
 <button id="connect">Connect</button>
 <button id="disconnect">Disconnect</button>
 
 <button id="start">Start</button>
 <button id="stop">Stop</button>
-<span id="control-status">Enter an address for your LabQuest2 and click Connect.</span>
+<span id="control-status">Click Connect to start.</span>
 
 <div class="flexBox">
     <div>
