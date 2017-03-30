@@ -36,6 +36,9 @@
 <script>
     $(document).ready(function() {
         var sensorIP = "http://127.0.0.1:11180";
+        if ("https:" == document.location.protocol) {
+            sensorIP = "https://localhost:11181";
+        }
         sensor = new sensorConnectorInterface();
         
         $('#connect').on('click', function() {
