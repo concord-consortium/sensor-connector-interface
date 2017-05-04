@@ -1,6 +1,6 @@
 {
   "name": "@concord-consortium/sensor-connector-interface",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Javascript interface to the Sensor Connector",
   "main": "main.js",
   "dependencies": {
@@ -17,5 +17,9 @@
     "build": "mkdir -p dist && browserify main.js --standalone sensor-connector-interface > dist/sensor-connector-interface.js"
   },
   "author": "Richard Klancer <rpk@pobox.com>",
-  "licenses": ["MIT", "Simplified BSD", "Apache 2.0"]
+  "licenses": [
+    "MIT",
+    "Simplified BSD",
+    "Apache 2.0"
+  ]
 }
