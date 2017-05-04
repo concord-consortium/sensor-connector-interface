@@ -567,7 +567,10 @@ var SensorConnectorState = Machina.Fsm.extend({
 
 });
 
-function SensorConnectorInterface() {
+/**
+ * @constructor
+ */
+var SensorConnectorInterface = function(){
   return {
     stateMachine: new SensorConnectorState(),
 
@@ -641,4 +644,4 @@ function SensorConnectorInterface() {
   };
 }
 
-module.exports = SensorConnectorInterface;
+exports.default = SensorConnectorInterface;
