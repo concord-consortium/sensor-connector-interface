@@ -159,7 +159,7 @@ Sent when an error occurs.
 
 As an implementation detail, the events marked with a [1] are called from the status response handler of the SensorConnectorInterface. Currently, the contents of the status response can be retrieved with `sensorConnector.stateMachine.currentActionArgs`, i.e. by reaching into the internal state of the finite state machine directly. A better API should be provided for accessing this information and this method should be deprecated. In the meantime, the `currentActionArgs` is a two-element array in which the sensor configuration is in `currentActionArgs[1]`. The `currentActionArgs` have this form as a TypeScript definition:
 ```
-export interface ISensorConfigColumnInfo {
+interface ISensorConfigColumnInfo {
   id:string;
   setID:string;
   position:number;
@@ -177,7 +177,7 @@ interface ISensorConfigSet {
   colIDs:number[];
 }
 
-export interface ISensorConfig {
+interface ISensorConfig {
   collection:{ canControl:boolean; isCollecting:boolean; };
   columnListTimeStamp:Date;
   columns:{ [key:string]: ISensorConfigColumnInfo; };
@@ -192,15 +192,15 @@ export interface ISensorConfig {
   setID?:string;
 }
 
-export interface IMachinaAction {
+interface IMachinaAction {
   inputType:string;
   delegated:boolean;
   ticket:any;
 }
 
-export interface IStatusReceivedTuple
-        extends Array<IMachinaAction|ISensorConfig>
-                  {0:IMachinaAction, 1:ISensorConfig}
+interface IStatusReceivedTuple
+  extends Array<IMachinaAction|ISensorConfig>
+            {0:IMachinaAction, 1:ISensorConfig}
 ```
 
 ### [2] currentActionArgs:IColumnDataTuple
@@ -212,15 +212,15 @@ As an implementation detail, the events marked with a [2] are called from the 'c
 
 The column data values in `currentActionArgs[2]` are time values for dataset IDs that end in '0', and sensor data values for all other dataset IDs. The `currentActionArgs` have this form as a TypeScript definition:
 ```
-export interface IMachinaAction {
+interface IMachinaAction {
   inputType:string;
   delegated:boolean;
   ticket:any;
 }
 
-export interface IColumnDataTuple
-        extends Array<IMachinaAction|string|number[]|Date>
-                  {0:IMachinaAction, 1:string, 2:number[], 3:Date}
+interface IColumnDataTuple
+  extends Array<IMachinaAction|string|number[]|Date>
+            {0:IMachinaAction, 1:string, 2:number[], 3:Date}
 ```
 
 ## License
