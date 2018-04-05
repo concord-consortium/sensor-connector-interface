@@ -25,11 +25,28 @@ var SensorConnectorInterface = require("@concord-consortium/sensor-connector-int
 var sensorConnector = new SensorConnectorInterface();
 ```
 
+## Development
+
+Install local dependencies:
+```
+npm install
+```
+
+Build for distribution:
+```
+npm run build
+```
+
+Test locally:
+```
+npm run start
+```
+
 ## Methods
 
 ### startPolling(addresses, clientId, clientName)
 
-Initiates the connection to the SensorConnector. `addresses` can be a single address or an array of addresses which are used to communicate with the SensorConnector. `http://127.0.0.1:11180` is used by at least one client, but others may be supported by the SensorConnector.
+Initiates the connection to the SensorConnector application. `addresses` can be a single address or an array of addresses which are used to communicate with the SensorConnector. The SensorConnector application currently supports `http://127.0.0.1:11180` and `https://127.0.0.1:11181`.
 
 ### stopPolling()
 
