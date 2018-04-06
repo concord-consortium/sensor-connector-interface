@@ -1,8 +1,11 @@
 {
   "name": "@concord-consortium/sensor-connector-interface",
   "version": "0.1.2",
+  "author": "The Concord Consortium",
   "description": "Javascript interface to the Sensor Connector",
-  "main": "main.js",
+  "license": "MIT",
+  "main": "dist/sensor-connector-interface.js",
+  "files": [ "dist" ],
   "dependencies": {
     "es6-promise": "^4.2.4",
     "eventemitter2": "^5.0.1",
@@ -16,11 +19,5 @@
     "build": "mkdir -p dist && browserify main.js --standalone sensor-connector-interface > dist/sensor-connector-interface.js",
     "start": "open index.html",
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "The Concord Consortium",
-  "licenses": [
-    "MIT",
-    "Simplified BSD",
-    "Apache 2.0"
-  ]
+  }
 }
