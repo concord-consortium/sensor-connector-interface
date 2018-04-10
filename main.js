@@ -11,7 +11,7 @@
 //     requestedValuesTimeStamp
 //     receivedValuesTimeStamp
 
-var RSVP = require('rsvp');
+require('es6-promise').polyfill();
 var _ = require('lodash');
 var Machina = require('machina');
 
@@ -538,7 +538,7 @@ var SensorConnectorState = Machina.Fsm.extend({
 
   promisifyRequest: function(url) {
     var fsm = this;
-    return new RSVP.Promise(function(resolve, reject) {
+    return new Promise(function(resolve, reject) {
       var xhr = fsm._createCORSRequest('GET', url);
       if ( ! xhr ) {
         reject(new Error("This browser does not appear to support Cross-Origin Resource Sharing"));
@@ -644,4 +644,4 @@ var SensorConnectorInterface = function(){
   };
 }
 
-exports.default = SensorConnectorInterface;
+module.exports = SensorConnectorInterface;
