@@ -2,10 +2,12 @@
   "name": "@concord-consortium/sensor-connector-interface",
   "version": "0.1.2",
   "author": "The Concord Consortium",
-  "description": "Javascript interface to the Sensor Connector",
+  "description": "JavaScript interface to the Sensor Connector",
   "license": "MIT",
   "main": "dist/sensor-connector-interface.js",
-  "files": [ "dist" ],
+  "files": [
+    "dist"
+  ],
   "dependencies": {
     "es6-promise": "^4.2.4",
     "eventemitter2": "^5.0.1",

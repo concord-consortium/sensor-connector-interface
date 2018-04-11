@@ -515,6 +515,9 @@ var SensorConnectorState = Machina.Fsm.extend({
 
   // see http://www.html5rocks.com/en/tutorials/cors/
   _createCORSRequest: function(method, relativeUrl) {
+    // ignore requests before we've connected
+    if (!this.urlPrefix) return null;
+
     var url = this.urlPrefix + relativeUrl + this.urlQueryParams;
     var xhr = new XMLHttpRequest();
 
@@ -541,7 +544,7 @@ var SensorConnectorState = Machina.Fsm.extend({
     return new Promise(function(resolve, reject) {
       var xhr = fsm._createCORSRequest('GET', url);
       if ( ! xhr ) {
-        reject(new Error("This browser does not appear to support Cross-Origin Resource Sharing"));
+        reject(new Error("Must connect to SensorConnector first."));
       }
       xhr.send();
 
@@ -560,6 +563,7 @@ var SensorConnectorState = Machina.Fsm.extend({
     }
     var obj = document.createElement('div');
     obj.id = 'sensor-connector-launch-frame-parent';
+    obj.style.visibility = 'hidden';
     obj.innerHTML = '<iframe id="sensor-connector-launch-frame" src="ccsc://sensorconnector.concord.org/"></iframe>';
     document.body.appendChild(obj);
     this._launchFrame = document.getElementById('sensor-connector-launch-frame-parent');
@@ -586,6 +590,10 @@ var SensorConnectorInterface = function(){
       this.stateMachine.transition('disconnected');
     },
 
+    requestExit: function() {
+      return this.stateMachine.promisifyRequest('/exit');
+    },
+
     requestStart: function() { return this.stateMachine.promisifyRequest('/control/start'); },
 
     requestStop: function() { return this.stateMachine.promisifyRequest('/control/stop'); },
@@ -595,7 +603,10 @@ var SensorConnectorInterface = function(){
     },
 
     off: function() {
-      events.off.apply(events, arguments);
+      if (arguments.length)
+        events.off.apply(events, arguments);
+      else
+        events.removeAllListeners();
     },
 
     get clientId() {
