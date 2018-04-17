@@ -160,8 +160,7 @@ var SensorConnectorState = Machina.Fsm.extend({
           return;
         }
 
-        var currentlyAttached = typeof(response.currentInterface) === "undefined" || response.currentInterface === null || response.currentInterface !== "None Found";
-        if (!currentlyAttached) {
+        if (!this._hasAttachedInterface(response)) {
           this.transition('interfaceMissing');
           return;
         }
@@ -206,8 +205,7 @@ var SensorConnectorState = Machina.Fsm.extend({
           return;
         }
 
-        var currentlyAttached = typeof(response.currentInterface) === "undefined" || response.currentInterface === null || response.currentInterface !== "None Found";
-        if (!currentlyAttached) {
+        if (!this._hasAttachedInterface(response)) {
           this.transition('interfaceMissing');
           return;
         }
@@ -252,8 +250,7 @@ var SensorConnectorState = Machina.Fsm.extend({
           return;
         }
 
-        var currentlyAttached = typeof(response.currentInterface) === "undefined" || response.currentInterface === null || response.currentInterface !== "None Found";
-        if (!currentlyAttached) {
+        if (!this._hasAttachedInterface(response)) {
           this.transition('interfaceMissing');
           return;
         }
@@ -284,8 +281,7 @@ var SensorConnectorState = Machina.Fsm.extend({
 
         this._processStatus(response);
 
-        var currentlyAttached = typeof(response.currentInterface) === "undefined" || response.currentInterface === null || response.currentInterface !== "None Found";
-        if (currentlyAttached) {
+        if (this._hasAttachedInterface(response)) {
           if (response.collection.canControl) {
             this.transition('polling');
           } else {
@@ -380,7 +376,10 @@ var SensorConnectorState = Machina.Fsm.extend({
     xhr.send();
   },
 
-
+  _hasAttachedInterface: function(response) {
+    const currentInterface = response && response.currentInterface;
+    return (currentInterface != null) && (currentInterface !== "None Found");
+  },
 
   _initializeSession: function() {
     this.datasets = [];
