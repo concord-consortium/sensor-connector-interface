@@ -407,7 +407,11 @@ var SensorConnectorState = Machina.Fsm.extend({
         events.emit('sessionChanged');
         this._sessionChangedEmitted = true;
       }
-      return false;
+      this._currentSessionID = response.sessionID;
+    }
+    else {
+      // reset flag after we've returned to the same session
+      this._sessionChangedEmitted = false;
     }
     this._processDatasets(response.sets);
     this._processColumns(response.columns);
@@ -590,13 +594,28 @@ var SensorConnectorInterface = function(){
       this.stateMachine.transition('disconnected');
     },
 
+    requestStart: function() { return this.stateMachine.promisifyRequest('/control/start'); },
+
+    requestStop: function() { return this.stateMachine.promisifyRequest('/control/stop'); },
+
     requestExit: function() {
       return this.stateMachine.promisifyRequest('/exit');
     },
 
-    requestStart: function() { return this.stateMachine.promisifyRequest('/control/start'); },
-
-    requestStop: function() { return this.stateMachine.promisifyRequest('/control/stop'); },
+    // Returns true if the SensorConnector is already running,
+    // false if launch was actually required/attempted (in which
+    // case client may need to delay further communication for a bit).
+    requestLaunch: function() {
+      if (this.isConnected) {
+        // already running/connected
+        return true;
+      }
+      else {
+        // attempt to launch
+        this.stateMachine.transition('launching');
+        return false;
+      }
+    },
 
     on: function() {
       events.on.apply(events, arguments);
@@ -633,6 +652,10 @@ var SensorConnectorInterface = function(){
       return this.stateMachine.datasets;
     },
 
+    get currentActionArgs() {
+      return this.stateMachine.currentActionArgs;
+    },
+
     get isConnected() {
       return ['polling','collecting','controlDisabled','interfaceMissing'].indexOf(this.stateMachine.state) !== -1;
     },
@@ -645,12 +668,12 @@ var SensorConnectorInterface = function(){
       return this.stateMachine.state !== 'controlDisabled';
     },
 
-    get launchTimedOut() {
-      return this.stateMachine.state === 'launchTimedOut';
-    },
-
     get canControl() {
       return this.stateMachine.state !== 'controlDisabled';
+    },
+
+    get launchTimedOut() {
+      return this.stateMachine.state === 'launchTimedOut';
     }
   };
 }

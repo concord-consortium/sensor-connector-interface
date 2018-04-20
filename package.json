@@ -5,6 +5,7 @@
   "description": "JavaScript interface to the Sensor Connector",
   "license": "MIT",
   "main": "dist/sensor-connector-interface.js",
+  "types": "index.d.ts",
   "files": [
     "dist"
   ],
@@ -18,7 +19,9 @@
     "browserify": "^16.1.1"
   },
   "scripts": {
-    "build": "mkdir -p dist && browserify main.js --standalone sensor-connector-interface > dist/sensor-connector-interface.js",
+    "build": "mkdir -p dist && npm run bundle",
+    "bundle": "browserify main.js --standalone sensor-connector-interface > dist/sensor-connector-interface.js",
+    "clean": "rm -rf dist",
     "start": "open index.html",
     "test": "echo \"Error: no test specified\" && exit 1"
   }
