@@ -407,7 +407,11 @@ var SensorConnectorState = Machina.Fsm.extend({
         events.emit('sessionChanged');
         this._sessionChangedEmitted = true;
       }
-      return false;
+      this._currentSessionID = response.sessionID;
+    }
+    else {
+      // reset flag after we've returned to the same session
+      this._sessionChangedEmitted = false;
     }
     this._processDatasets(response.sets);
     this._processColumns(response.columns);
@@ -515,6 +519,9 @@ var SensorConnectorState = Machina.Fsm.extend({
 
   // see http://www.html5rocks.com/en/tutorials/cors/
   _createCORSRequest: function(method, relativeUrl) {
+    // ignore requests before we've connected
+    if (!this.urlPrefix) return null;
+
     var url = this.urlPrefix + relativeUrl + this.urlQueryParams;
     var xhr = new XMLHttpRequest();
 
@@ -541,7 +548,7 @@ var SensorConnectorState = Machina.Fsm.extend({
     return new Promise(function(resolve, reject) {
       var xhr = fsm._createCORSRequest('GET', url);
       if ( ! xhr ) {
-        reject(new Error("This browser does not appear to support Cross-Origin Resource Sharing"));
+        reject(new Error("Must connect to SensorConnector first."));
       }
       xhr.send();
 
@@ -560,6 +567,7 @@ var SensorConnectorState = Machina.Fsm.extend({
     }
     var obj = document.createElement('div');
     obj.id = 'sensor-connector-launch-frame-parent';
+    obj.style.visibility = 'hidden';
     obj.innerHTML = '<iframe id="sensor-connector-launch-frame" src="ccsc://sensorconnector.concord.org/"></iframe>';
     document.body.appendChild(obj);
     this._launchFrame = document.getElementById('sensor-connector-launch-frame-parent');
@@ -590,12 +598,34 @@ var SensorConnectorInterface = function(){
 
     requestStop: function() { return this.stateMachine.promisifyRequest('/control/stop'); },
 
+    requestExit: function() {
+      return this.stateMachine.promisifyRequest('/exit');
+    },
+
+    // Returns true if the SensorConnector is already running,
+    // false if launch was actually required/attempted (in which
+    // case client may need to delay further communication for a bit).
+    requestLaunch: function() {
+      if (this.isConnected) {
+        // already running/connected
+        return true;
+      }
+      else {
+        // attempt to launch
+        this.stateMachine.transition('launching');
+        return false;
+      }
+    },
+
     on: function() {
       events.on.apply(events, arguments);
     },
 
     off: function() {
-      events.off.apply(events, arguments);
+      if (arguments.length)
+        events.off.apply(events, arguments);
+      else
+        events.removeAllListeners();
     },
 
     get clientId() {
@@ -622,6 +652,10 @@ var SensorConnectorInterface = function(){
       return this.stateMachine.datasets;
     },
 
+    get currentActionArgs() {
+      return this.stateMachine.currentActionArgs;
+    },
+
     get isConnected() {
       return ['polling','collecting','controlDisabled','interfaceMissing'].indexOf(this.stateMachine.state) !== -1;
     },
@@ -634,12 +668,12 @@ var SensorConnectorInterface = function(){
       return this.stateMachine.state !== 'controlDisabled';
     },
 
-    get launchTimedOut() {
-      return this.stateMachine.state === 'launchTimedOut';
-    },
-
     get canControl() {
       return this.stateMachine.state !== 'controlDisabled';
+    },
+
+    get launchTimedOut() {
+      return this.stateMachine.state === 'launchTimedOut';
     }
   };
 }

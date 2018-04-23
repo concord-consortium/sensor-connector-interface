@@ -41,20 +41,30 @@
         }
         sensor = new sensorConnectorInterface();
         
-        $('#connect').on('click', function() {
+        function connect() {
             $('#control-status').html('Remote control is enabled. To collect data, press start/stop on this page.');
             var ip = $('input[name=ip]').val();
-            sensor.startPolling(sensorIP);
             sensor.on('*', function() {
                 var args = Array.prototype.slice.call(arguments, 0);
                 $('#events').prepend('<p>' + this.event + '(' + args.join(',') + ')</p>');
             });
             sensor.on('data', dataHandler);
+            sensor.startPolling(sensorIP);
+        }
+
+        function disconnect() {
+            sensor.stopPolling();
+            // remove all listeners
+            sensor.off();
+            $('#control-status').html('Click Connect.');
+        }
+
+        $('#connect').on('click', function() {
+            connect();
         });
 
         $('#disconnect').on('click', function() {
-            sensor.stopPolling();
-            $('#control-status').html('Click Connect.');
+            disconnect();
         });
 
         $('#start').on('click', function() {
@@ -63,6 +73,11 @@
 
         $('#stop').on('click', function() {
             sensor.requestStop();
+        });
+
+        $('#exit').on('click', function() {
+            disconnect();
+            sensor.requestExit();
         });
 
         sensor.on('controlDisabled', function() {
@@ -157,6 +172,7 @@
 
 <button id="start">Start</button>
 <button id="stop">Stop</button>
+<button id="exit">Exit</button>
 <span id="control-status">Click Connect to start.</span>
 
 <div class="flexBox">
