@@ -1,11 +1,11 @@
 {
   "name": "@concord-consortium/sensor-connector-interface",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "author": "The Concord Consortium",
   "description": "JavaScript interface to the Sensor Connector",
   "license": "MIT",
   "main": "dist/sensor-connector-interface.js",
-  "types": "index.d.ts",
+  "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
@@ -16,12 +16,14 @@
     "machina": "^2.0.2"
   },
   "devDependencies": {
-    "browserify": "^16.1.1"
+    "browserify": "^16.1.1",
+    "copyfiles": "^2.0.0"
   },
   "scripts": {
-    "build": "mkdir -p dist && npm run bundle",
+    "build": "mkdir -p dist && npm run bundle && npm run copy-definitions",
     "bundle": "browserify main.js --standalone sensor-connector-interface > dist/sensor-connector-interface.js",
     "clean": "rm -rf dist",
+    "copy-definitions": "copyfiles index.d.ts dist",
     "start": "open index.html",
     "test": "echo \"Error: no test specified\" && exit 1"
   }
