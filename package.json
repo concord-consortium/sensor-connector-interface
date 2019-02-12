@@ -17,10 +17,11 @@
   },
   "devDependencies": {
     "browserify": "^16.2.3",
-    "copyfiles": "^2.1.0"
+    "copyfiles": "^2.1.0",
+    "mkdirp": "^0.5.1"
   },
   "scripts": {
-    "build": "mkdir -p dist && npm run bundle && npm run copy-definitions",
+    "build": "mkdirp dist && npm run bundle && npm run copy-definitions",
     "bundle": "browserify main.js --standalone sensor-connector-interface > dist/sensor-connector-interface.js",
     "clean": "rm -rf dist",
     "copy-definitions": "copyfiles index.d.ts dist",
