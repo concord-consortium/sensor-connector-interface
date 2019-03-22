@@ -42,6 +42,15 @@ Test locally:
 npm run start
 ```
 
+This launches a local page which supports connecting to the SensorConnector application and logging communication with it.
+
+## Publication
+
+`sensor-connector-interface` is published as an npm module under the name `@concord-consortium/sensor-connector-interface`. Updates should be published to npm using a new version number that follows semver. To publish, simply configure your npm account (you must have authorization to publish for the @concord-consortium organization) and then:
+```
+npm publish
+```
+
 ## Methods
 
 ### startPolling(addresses, clientId, clientName)
