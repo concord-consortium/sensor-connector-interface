@@ -3,6 +3,7 @@
   "version": "0.1.4",
   "author": "The Concord Consortium",
   "description": "JavaScript interface to the Sensor Connector",
+  "repository": "https://github.com/concord-consortium/sensor-connector-interface",
   "license": "MIT",
   "main": "dist/sensor-connector-interface.js",
   "types": "dist/index.d.ts",
