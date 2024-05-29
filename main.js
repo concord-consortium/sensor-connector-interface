@@ -593,7 +593,8 @@ var SensorConnectorInterface = function(){
       this.stateMachine.transition('disconnected');
     },
 
-    requestStart: function() { return this.stateMachine.promisifyRequest('/control/start'); },
+    // NOTE: measurementPeriod is not used currently here but it used in the sensor-interactive which shares this api interface
+    requestStart: function(measurementPeriod) { return this.stateMachine.promisifyRequest('/control/start'); },
 
     requestStop: function() { return this.stateMachine.promisifyRequest('/control/stop'); },
 
