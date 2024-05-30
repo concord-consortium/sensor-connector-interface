@@ -1,6 +1,6 @@
 {
   "name": "@concord-consortium/sensor-connector-interface",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "author": "The Concord Consortium",
   "description": "JavaScript interface to the Sensor Connector",
   "repository": "https://github.com/concord-consortium/sensor-connector-interface",
