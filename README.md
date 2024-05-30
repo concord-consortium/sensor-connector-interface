@@ -61,7 +61,7 @@ Initiates the connection to the SensorConnector application. `addresses` can be 
 
 Closes the connection to the SensorConnector.
 
-### requestStart()
+### requestStart(measurementPeriod?:number)
 
 Starts data collection.
 

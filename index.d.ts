@@ -28,12 +28,12 @@ declare interface ISensorDefinition {
     minReading:number;
     maxReading:number;
 }
-  
+
 declare interface ISensorConnectorDataset {
     id:string;
     columns:ISensorConfigColumnInfo[];
 }
-  
+
 declare interface ISensorConfigColumnInfo {
     id:string;
     setID:string;
@@ -47,12 +47,12 @@ declare interface ISensorConfigColumnInfo {
     data?:number[];
 }
 type SensorConfigColumnInfo = ISensorConfigColumnInfo;
-  
+
 declare interface ISensorConfigSet {
     name:string;
     colIDs:number[];
 }
-  
+
 declare interface ISensorConfig {
     collection:{ canControl:boolean; isCollecting:boolean; };
     columnListTimeStamp:Date;
@@ -67,13 +67,13 @@ declare interface ISensorConfig {
     sets:{ [key:string]: ISensorConfigSet; };
     setID?:string;
 }
-  
+
 declare interface IMachinaAction {
     inputType:string;
     delegated:boolean;
     ticket:any;
 }
-  
+
 declare interface IStatusReceivedTuple
           extends Array<IMachinaAction|ISensorConfig>
                     {0:IMachinaAction; 1:ISensorConfig;}
@@ -91,7 +91,7 @@ declare class SensorConnectorInterface {
     startPolling(addresses: string | string[], clientId?: string, clientName?: string) : void;
     stopPolling(): void;
 
-    requestStart(): Promise<string>;
+    requestStart(measurementPeriod?:number): Promise<string>;
     requestStop(): Promise<string>;
 
     requestExit(): Promise<string>;
